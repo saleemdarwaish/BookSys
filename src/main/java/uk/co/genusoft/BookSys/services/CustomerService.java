@@ -1,15 +1,14 @@
 package uk.co.genusoft.BookSys.services;
 
+import java.util.Map;
+import javax.persistence.EntityExistsException;
+import javax.persistence.EntityNotFoundException;
 import lombok.AllArgsConstructor;
 import lombok.NonNull;
 import org.springframework.stereotype.Service;
 import uk.co.genusoft.BookSys.data.models.Customer;
 import uk.co.genusoft.BookSys.data.repositories.CustomerRepository;
 import uk.co.genusoft.BookSys.dtos.CreateCustomerDto;
-
-import javax.persistence.EntityExistsException;
-import javax.persistence.EntityNotFoundException;
-import java.util.Map;
 
 @Service
 @AllArgsConstructor
@@ -35,7 +34,7 @@ public class CustomerService {
                     throw new EntityExistsException(String.format("Customer with mobile or telephone number %s already exists", number));
                 });
 
-        Customer Customer = dtoMapper.map(request, Customer.class);
+        Customer Customer = dtoMapper.toCustomer(request);
         return customerRepository.save(Customer);
     }
 
@@ -43,11 +42,11 @@ public class CustomerService {
         constraintsValidator.validate(CreateCustomerDto.class, updatedFields);
 
         Customer Customer = getCustomer(CustomerId);
-        CreateCustomerDto request = dtoMapper.map(Customer, CreateCustomerDto.class);
+        CreateCustomerDto request = dtoMapper.toCreateCustomerDto(Customer);
 
         CreateCustomerDto updatedEntity = entityMapper.mergeFieldsWithEntity(CreateCustomerDto.class, request, updatedFields);
 
-        Customer entity = dtoMapper.map(updatedEntity, Customer.class);
+        Customer entity = dtoMapper.toCustomer(updatedEntity);
         entity.setId(CustomerId);
 
         customerRepository.save(entity);
